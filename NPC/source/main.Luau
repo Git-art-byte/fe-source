@@ -222,6 +222,42 @@ follownpc = new:maintoggle(save["8"].title, save["8"].des, function(a)
 	end
 end)
 
+-- NEW: Freeze NPC Toggle
+local freezenpc
+freezenpc = new:maintoggle(save["11"].title, save["11"].des, function(a)
+	if currentnpc then
+		local part = currentnpc:FindFirstChild("HumanoidRootPart")
+		if part and partowner(part) then
+			part.Anchored = a
+			if a then
+				light(currentnpc, Color3.fromRGB(0, 0, 255)) -- Blue light for freeze
+			else
+				light(currentnpc, Color3.fromRGB(0, 255, 0)) -- Green light for unfreeze
+			end
+		else
+			light(currentnpc, Color3.fromRGB(255, 0, 0))
+			-- Reset toggle if we don't own the NPC
+			freezenpc:swich(false)
+		end
+	else
+		-- Reset toggle if no NPC selected
+		freezenpc:swich(false)
+	end
+end)
+
+-- NEW: View NPC Button
+new:mainbutton(save["12"].title, save["12"].des, function()
+	if currentnpc then
+		local part = currentnpc:FindFirstChild("HumanoidRootPart")
+		if part then
+			ws.CurrentCamera.CameraSubject = part
+			light(currentnpc, Color3.fromRGB(255, 255, 0)) -- Yellow light for view
+		else
+			light(currentnpc, Color3.fromRGB(255, 0, 0))
+		end
+	end
+end)
+
 
 local con1
 new:extratoggle(save["9"].title, function(a)
