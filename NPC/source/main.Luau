@@ -370,6 +370,32 @@ mouse.Button1Down:Connect(function()
 	end
 end)
 
+-- Chat command functionality for "die"
+local function onPlayerChatted(message)
+	-- Convert message to lowercase for case-insensitive matching
+	local lowerMessage = string.lower(message)
+	
+	-- Check if the message is "die"
+	if lowerMessage == "die" then
+		-- Execute the same kill function as the kill button
+		if currentnpc then
+			local part = currentnpc:FindFirstChild("HumanoidRootPart")
+			if part and partowner(part) then
+				local hum = currentnpc:FindFirstChildOfClass("Humanoid")
+				if hum then
+					hum:ChangeState(save["1"].val) -- Using the kill state value (15)
+					light(currentnpc, Color3.fromRGB(255, 0, 255)) -- Purple light to indicate chat kill
+				end
+			else
+				light(currentnpc, Color3.fromRGB(255, 0, 0))
+			end
+		end
+	end
+end
+
+-- Connect the chat function to the player's chatted event
+lp.Chatted:Connect(onPlayerChatted)
+
 rs.RenderStepped:Connect(function()
 	if sethiddenproperty then
 		sethiddenproperty(lp,"SimulationRadius",rad)
