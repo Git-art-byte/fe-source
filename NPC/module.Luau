@@ -1260,7 +1260,7 @@ local create = function()
 			toggle = not toggle
 			if func then
 				task.spawn(function()
-					tweenservice:Create(togglesample.Frame.ImageButton, TweenInfo.new(.2), {ImageColor3 = toggle and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(232, 232, 232)}):Play()
+					tweenservice:Create(togglesample.toggle, TweenInfo.new(.2), {BackgroundColor3 = toggle and Color3.fromRGB(26, 255, 0) or Color3.fromRGB(188, 0, 0)}):Play()
 				end)
 
 				local _,err = pcall(func, toggle)
