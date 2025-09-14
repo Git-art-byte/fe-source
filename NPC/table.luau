@@ -12,5 +12,6 @@ return {
 	["11"] = {title = "view npc", des = "view through the selected npc camera perspective"},
 	["12"] = {title = "freeze npc", des = "freeze/unfreeze the selected npc in place"},
 	["13"] = {title = "spin npc", des = "make the selected npc spin rapidly in place"},
-	["14"] = {title = "dance npc", des = "make the selected npc perform the floss dance", val = 5917570207}
+	["14"] = {title = "dance npc", des = "make the selected npc perform the floss dance", val = 5917570207},
+	["15"] = {title = "freeze aura any npc", des = "freeze all npcs within 13 studs radius around you"}
 }
