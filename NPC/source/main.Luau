@@ -335,6 +335,50 @@ new:extratoggle(save["10"].title, function(a)
 	end
 end)
 
+-- NEW: Freeze Aura Any NPC Toggle (Main Panel)
+local con3
+new:maintoggle(save["15"].title, save["15"].des, function(a)
+	if a then
+		con3 = rs.Stepped:Connect(function()
+			local hrp1 = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+			if not hrp1 then return end
+
+			local nbp = ws:GetPartBoundsInRadius(hrp1.Position, 13)
+			for _, part in pairs(nbp) do
+				local model = part:FindFirstAncestorOfClass("Model")
+				if model and isnpc(model) then
+					local npc = model
+					local hrp = npc:FindFirstChild("HumanoidRootPart")
+					if hrp and partowner(hrp) and not hrp.Anchored and npc ~= lp.Character then
+						hrp.Anchored = true
+					end
+				end
+			end
+		end)
+		table.insert(_G.oldconnections, con3)
+	else
+		if con3 then
+			con3:Disconnect()
+			con3 = nil
+		end
+		-- Unfreeze all NPCs in range when disabled
+		local hrp1 = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+		if hrp1 then
+			local nbp = ws:GetPartBoundsInRadius(hrp1.Position, 13)
+			for _, part in pairs(nbp) do
+				local model = part:FindFirstAncestorOfClass("Model")
+				if model and isnpc(model) then
+					local npc = model
+					local hrp = npc:FindFirstChild("HumanoidRootPart")
+					if hrp and partowner(hrp) and hrp.Anchored and npc ~= lp.Character then
+						hrp.Anchored = false
+					end
+				end
+			end
+		end
+	end
+end)
+
 -- NEW: View NPC Toggle
 local originalCameraSubject, viewnpc
 viewnpc = new:maintoggle(save["11"].title, save["11"].des, function(a)
