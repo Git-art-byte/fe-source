@@ -205,6 +205,35 @@ new:mainbutton(save["7"].title, save["7"].des, function()
 	end
 end)
 
+new:mainbutton(save["14"].title, save["14"].des, function()
+	if currentnpc then
+		local part = currentnpc:FindFirstChild("HumanoidRootPart")
+		if part and partowner(part) then
+			local hum = currentnpc:FindFirstChildOfClass("Humanoid")
+			if hum then
+				-- Create and load the dance animation
+				local animator = hum:FindFirstChildOfClass("Animator")
+				if not animator then
+					animator = Instance.new("Animator")
+					animator.Parent = hum
+				end
+				
+				local danceAnim = Instance.new("Animation")
+				danceAnim.AnimationId = "rbxassetid://" .. save["14"].val
+				
+				local animTrack = animator:LoadAnimation(danceAnim)
+				animTrack.Looped = true
+				animTrack:Play()
+				
+				light(currentnpc, Color3.fromRGB(255, 192, 203)) -- Pink highlight
+				print("NPC is now dancing!")
+			end
+		else
+			light(currentnpc, Color3.fromRGB(255, 0, 0))
+		end
+	end
+end)
+
 local con, follownpc
 follownpc = new:maintoggle(save["8"].title, save["8"].des, function(a)
 	if a then
@@ -364,6 +393,53 @@ freezenpc = new:maintoggle(save["12"].title, save["12"].des, function(a)
 	end
 end)
 
+-- NEW: Spin NPC Toggle
+local spinConnection, spinnpc
+spinnpc = new:maintoggle(save["13"].title, save["13"].des, function(a)
+	if a then
+		if currentnpc then
+			local part = currentnpc:FindFirstChild("HumanoidRootPart")
+			if part and partowner(part) then
+				local originalCFrame = part.CFrame
+				local spinSpeed = 20 -- Adjust this value to change spin speed
+				spinConnection = rs.RenderStepped:Connect(function()
+					if currentnpc and currentnpc:FindFirstChild("HumanoidRootPart") then
+						local hrp = currentnpc:FindFirstChild("HumanoidRootPart")
+						if hrp and partowner(hrp) then
+							hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(spinSpeed), 0)
+						else
+							light(currentnpc, Color3.fromRGB(255, 0, 0))
+							if spinConnection then
+								spinnpc:swich(false)
+								spinConnection:Disconnect()
+								spinConnection = nil
+							end
+						end
+					else
+						if spinConnection then
+							spinnpc:swich(false)
+							spinConnection:Disconnect()
+							spinConnection = nil
+						end
+					end
+				end)
+				table.insert(_G.oldconnections, spinConnection)
+				light(currentnpc, Color3.fromRGB(255, 165, 0)) -- Orange highlight
+			else
+				light(currentnpc, Color3.fromRGB(255, 0, 0))
+				spinnpc:swich(false)
+			end
+		else
+			spinnpc:swich(false)
+		end
+	else
+		if spinConnection then
+			spinConnection:Disconnect()
+			spinConnection = nil
+		end
+	end
+end)
+
 -- Mouse click to select NPC
 local mouseConnection = mouse.Button1Down:Connect(function()
 	if clicknpc and mouse.Target and mouse.Target.Parent:FindFirstChild("HumanoidRootPart") then
@@ -385,46 +461,6 @@ local mouseConnection = mouse.Button1Down:Connect(function()
 	end
 end)
 table.insert(_G.oldconnections, mouseConnection)
-
--- CHAT COMMAND with prefix
-local prefix = "/"
-print("Setting up chat command with prefix:", prefix)
-
-local chatConnection = lp.Chatted:Connect(function(message)
-	print("Player said:", message)
-	
-	-- Check if message starts with prefix
-	if string.sub(message, 1, #prefix) == prefix then
-		local command = string.lower(string.sub(message, #prefix + 1))
-		print("Command detected:", command)
-		
-		if command == "die" then
-			print("Die command detected!")
-			if currentnpc then
-				print("Current NPC exists:", currentnpc.Name)
-				local part = currentnpc:FindFirstChild("HumanoidRootPart")
-				if part and partowner(part) then
-					local hum = currentnpc:FindFirstChildOfClass("Humanoid")
-					if hum then
-						print("Killing NPC via chat command...")
-						hum:ChangeState(save["1"].val)
-						light(currentnpc, Color3.fromRGB(255, 0, 255))
-						print("NPC killed via chat!")
-					else
-						print("No humanoid found")
-					end
-				else
-					print("No network ownership or no part")
-					light(currentnpc, Color3.fromRGB(255, 0, 0))
-				end
-			else
-				print("No NPC selected! Click on an NPC first.")
-			end
-		end
-	end
-end)
-table.insert(_G.oldconnections, chatConnection)
-print("Chat command setup complete!")
 
 -- Simulation radius connection
 local simConnection = rs.RenderStepped:Connect(function()
