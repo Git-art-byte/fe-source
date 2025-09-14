@@ -1,19 +1,36 @@
---1. rules: it is forbidden to change the credit name, this script was created by @im_patrick you will be charged dcma for changing the credit
---2. rules: changing the code using AI and claiming it as your own is not allowed
+-- FIXED VERSION WITH PROPER PROTECTION AND DEBUG
+print("NPC Script Starting...")
 
-if patricknpcpanel then return end; patricknpcpanel = true
+-- Prevent multiple instances and cleanup old ones
+if _G.patricknpcpanel then 
+    warn("Script already running! Cleaning up old instance...")
+    if _G.oldgui then
+        _G.oldgui:Destroy()
+    end
+    if _G.oldconnections then
+        for _, connection in pairs(_G.oldconnections) do
+            if connection then
+                connection:Disconnect()
+            end
+        end
+    end
+end
+
+_G.patricknpcpanel = true
+_G.oldconnections = {}
 
 local github = "https://raw.githubusercontent.com/Git-art-byte/fe-source/refs/heads/main/NPC"
 local load = loadstring(game:HttpGet(github .. "/module.Luau"))()
 
 saved = loadstring(game:HttpGet(github .. "/table.luau"))()
 
-
-
 local save = saved or {}
 
 local g2l = load.G2L
 local new = load.create()
+
+-- Store GUI reference for cleanup
+_G.oldgui = g2l
 
 local lighting = game:GetService("Lighting")
 local tweenservice = game:GetService("TweenService")
@@ -56,6 +73,10 @@ local isnpc = function(ins)
 	return nil
 end
 
+-- Add partowner function (was missing)
+function partowner(part)
+	return part.ReceiveAge == 0
+end
 
 new:mainbutton(save["1"].title, save["1"].des, function()
 	if currentnpc then
@@ -64,6 +85,7 @@ new:mainbutton(save["1"].title, save["1"].des, function()
 			local hum = currentnpc:FindFirstChildOfClass("Humanoid")
 			if hum then
 				hum:ChangeState(save["1"].val)
+				print("NPC killed via button!")
 			end
 		else
 			light(currentnpc, Color3.fromRGB(255, 0, 0))
@@ -99,7 +121,6 @@ new:mainbutton(save["3"].title, save["3"].des, function()
 	end
 end)
 
-
 local chr, cons
 new:maintoggle(save["4"].title, save["4"].des, function(a)
 	if a then
@@ -110,12 +131,11 @@ new:maintoggle(save["4"].title, save["4"].des, function(a)
 					chr = lp.Character
 					lp.Character = currentnpc
 					ws.CurrentCamera.CameraSubject = currentnpc:FindFirstChild("HumanoidRootPart")
-					-- idea from sonle
 					local move = 0.01
 					cons = rs.PreSimulation:Connect(function()
 						local hum = lp.Character:FindFirstChildOfClass("Humanoid")
 						if lp.Character and hum then
-							hum.RootPart.CFrame += vector.create(0,move,0)
+							hum.RootPart.CFrame += Vector3.new(0,move,0)
 							move = -move
 						else
 							if cons then
@@ -124,6 +144,7 @@ new:maintoggle(save["4"].title, save["4"].des, function(a)
 							end
 						end
 					end)
+					table.insert(_G.oldconnections, cons)
 				end
 			else
 				light(currentnpc, Color3.fromRGB(255, 0, 0))
@@ -214,6 +235,7 @@ follownpc = new:maintoggle(save["8"].title, save["8"].des, function(a)
 				end
 			end
 		end)
+		table.insert(_G.oldconnections, con)
 	else
 		if con then
 			con:Disconnect()
@@ -221,7 +243,6 @@ follownpc = new:maintoggle(save["8"].title, save["8"].des, function(a)
 		end
 	end
 end)
-
 
 local con1
 new:extratoggle(save["9"].title, function(a)
@@ -245,6 +266,7 @@ new:extratoggle(save["9"].title, function(a)
 				end
 			end
 		end)
+		table.insert(_G.oldconnections, con1)
 	else
 		if con1 then
 			con1:Disconnect()
@@ -252,7 +274,6 @@ new:extratoggle(save["9"].title, function(a)
 		end
 	end
 end)
-
 
 local con2
 new:extratoggle(save["10"].title, function(a)
@@ -276,6 +297,7 @@ new:extratoggle(save["10"].title, function(a)
 				end
 			end
 		end)
+		table.insert(_G.oldconnections, con2)
 	else
 		if con2 then
 			con2:Disconnect()
@@ -291,27 +313,21 @@ viewnpc = new:maintoggle(save["11"].title, save["11"].des, function(a)
 		if currentnpc then
 			local part = currentnpc:FindFirstChild("HumanoidRootPart")
 			if part then
-				-- Store original camera subject
 				originalCameraSubject = ws.CurrentCamera.CameraSubject
-				-- Set camera to NPC
 				ws.CurrentCamera.CameraSubject = part
 				light(currentnpc, Color3.fromRGB(0, 255, 255))
 			else
 				light(currentnpc, Color3.fromRGB(255, 0, 0))
-				-- Auto-disable if no valid part
 				viewnpc:swich(false)
 			end
 		else
-			-- No NPC selected, auto-disable
 			viewnpc:swich(false)
 		end
 	else
-		-- Restore original camera subject
 		if originalCameraSubject then
 			ws.CurrentCamera.CameraSubject = originalCameraSubject
 			originalCameraSubject = nil
 		else
-			-- Fallback to player's humanoid
 			if lp.Character and lp.Character:FindFirstChildOfClass("Humanoid") then
 				ws.CurrentCamera.CameraSubject = lp.Character:FindFirstChildOfClass("Humanoid")
 			end
@@ -326,25 +342,21 @@ freezenpc = new:maintoggle(save["12"].title, save["12"].des, function(a)
 		if currentnpc then
 			local part = currentnpc:FindFirstChild("HumanoidRootPart")
 			if part and partowner(part) then
-				-- Freeze the NPC by anchoring it
 				part.Anchored = true
-				light(currentnpc, Color3.fromRGB(135, 206, 235)) -- Light blue for frozen
+				light(currentnpc, Color3.fromRGB(135, 206, 235))
 			else
 				light(currentnpc, Color3.fromRGB(255, 0, 0))
-				-- Auto-disable if no network ownership
 				freezenpc:swich(false)
 			end
 		else
-			-- No NPC selected, auto-disable
 			freezenpc:swich(false)
 		end
 	else
 		if currentnpc then
 			local part = currentnpc:FindFirstChild("HumanoidRootPart")
 			if part and partowner(part) then
-				-- Unfreeze the NPC by unanchoring it
 				part.Anchored = false
-				light(currentnpc, Color3.fromRGB(0, 255, 0)) -- Green for unfrozen
+				light(currentnpc, Color3.fromRGB(0, 255, 0))
 			else
 				light(currentnpc, Color3.fromRGB(255, 0, 0))
 			end
@@ -352,58 +364,70 @@ freezenpc = new:maintoggle(save["12"].title, save["12"].des, function(a)
 	end
 end)
 
-
-mouse.Button1Down:Connect(function()
+-- Mouse click to select NPC
+local mouseConnection = mouse.Button1Down:Connect(function()
 	if clicknpc and mouse.Target and mouse.Target.Parent:FindFirstChild("HumanoidRootPart") then
 		if mouse.Target.Parent:FindFirstChild("HumanoidRootPart").Anchored == false then
 			if not plrs:GetPlayerFromCharacter(mouse.Target.Parent) then
 				if partowner(mouse.Target.Parent:FindFirstChild("HumanoidRootPart")) then
 					currentnpc = mouse.Target.Parent
 					light(currentnpc, Color3.fromRGB(0, 255, 0))
+					print("NPC selected:", currentnpc.Name)
 				else
 					light(mouse.Target.Parent, Color3.fromRGB(255, 0, 0))
+					print("NPC not network owned")
 				end
 			end
 		else
 			light(mouse.Target.Parent, Color3.fromRGB(255, 0, 0))
+			print("NPC is anchored")
 		end
 	end
 end)
+table.insert(_G.oldconnections, mouseConnection)
 
--- Chat command functionality for "die"
-local function onPlayerChatted(message)
-	-- Convert message to lowercase for case-insensitive matching
+-- FIXED CHAT COMMAND - with debug prints
+print("Setting up chat command...")
+local chatConnection = lp.Chatted:Connect(function(message)
+	print("Player said:", message)
 	local lowerMessage = string.lower(message)
 	
-	-- Check if the message is "die"
 	if lowerMessage == "die" then
-		-- Execute the same kill function as the kill button
+		print("Die command detected!")
 		if currentnpc then
+			print("Current NPC exists:", currentnpc.Name)
 			local part = currentnpc:FindFirstChild("HumanoidRootPart")
 			if part and partowner(part) then
 				local hum = currentnpc:FindFirstChildOfClass("Humanoid")
 				if hum then
-					hum:ChangeState(save["1"].val) -- Using the kill state value (15)
-					light(currentnpc, Color3.fromRGB(255, 0, 255)) -- Purple light to indicate chat kill
+					print("Killing NPC via chat command...")
+					hum:ChangeState(save["1"].val)
+					light(currentnpc, Color3.fromRGB(255, 0, 255))
+					print("NPC killed via chat!")
+				else
+					print("No humanoid found")
 				end
 			else
+				print("No network ownership or no part")
 				light(currentnpc, Color3.fromRGB(255, 0, 0))
 			end
+		else
+			print("No NPC selected!")
 		end
 	end
-end
+end)
+table.insert(_G.oldconnections, chatConnection)
+print("Chat command setup complete!")
 
--- Connect the chat function to the player's chatted event
-lp.Chatted:Connect(onPlayerChatted)
-
-rs.RenderStepped:Connect(function()
+-- Simulation radius connection
+local simConnection = rs.RenderStepped:Connect(function()
 	if sethiddenproperty then
 		sethiddenproperty(lp,"SimulationRadius",rad)
 	else
 		lp.SimulationRadius=rad
 	end
 end)
+table.insert(_G.oldconnections, simConnection)
 
-
-print("Helloooo")
-return g2l, require;
+print("NPC Script loaded successfully!")
+return g2l, require
