@@ -386,33 +386,40 @@ local mouseConnection = mouse.Button1Down:Connect(function()
 end)
 table.insert(_G.oldconnections, mouseConnection)
 
--- FIXED CHAT COMMAND - with debug prints
-print("Setting up chat command...")
+-- FIXED CHAT COMMAND - with prefix
+local prefix = "/"  -- Change this to whatever prefix you want
+print("Setting up chat command with prefix:", prefix)
+
 local chatConnection = lp.Chatted:Connect(function(message)
 	print("Player said:", message)
-	local lowerMessage = string.lower(message)
 	
-	if lowerMessage == "die" then
-		print("Die command detected!")
-		if currentnpc then
-			print("Current NPC exists:", currentnpc.Name)
-			local part = currentnpc:FindFirstChild("HumanoidRootPart")
-			if part and partowner(part) then
-				local hum = currentnpc:FindFirstChildOfClass("Humanoid")
-				if hum then
-					print("Killing NPC via chat command...")
-					hum:ChangeState(save["1"].val)
-					light(currentnpc, Color3.fromRGB(255, 0, 255))
-					print("NPC killed via chat!")
+	-- Check if message starts with prefix
+	if string.sub(message, 1, #prefix) == prefix then
+		local command = string.lower(string.sub(message, #prefix + 1))
+		print("Command detected:", command)
+		
+		if command == "die" then
+			print("Die command detected!")
+			if currentnpc then
+				print("Current NPC exists:", currentnpc.Name)
+				local part = currentnpc:FindFirstChild("HumanoidRootPart")
+				if part and partowner(part) then
+					local hum = currentnpc:FindFirstChildOfClass("Humanoid")
+					if hum then
+						print("Killing NPC via chat command...")
+						hum:ChangeState(save["1"].val)
+						light(currentnpc, Color3.fromRGB(255, 0, 255))
+						print("NPC killed via chat!")
+					else
+						print("No humanoid found")
+					end
 				else
-					print("No humanoid found")
+					print("No network ownership or no part")
+					light(currentnpc, Color3.fromRGB(255, 0, 0))
 				end
 			else
-				print("No network ownership or no part")
-				light(currentnpc, Color3.fromRGB(255, 0, 0))
+				print("No NPC selected! Click on an NPC first.")
 			end
-		else
-			print("No NPC selected!")
 		end
 	end
 end)
