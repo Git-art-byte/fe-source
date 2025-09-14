@@ -19,7 +19,7 @@ end
 _G.patricknpcpanel = true
 _G.oldconnections = {}
 
-local github = "https://github.com/Git-art-byte/fe-source/tree/main/NPC"
+local github = "https://raw.githubusercontent.com/Git-art-byte/fe-source/refs/heads/main/NPC"
 local load = loadstring(game:HttpGet(github .. "/module.Luau"))()
 
 saved = loadstring(game:HttpGet(github .. "/table.luau"))()
