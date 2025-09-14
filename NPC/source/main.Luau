@@ -3,7 +3,7 @@
 
 if patricknpcpanel then return end; patricknpcpanel = true
 
-local github = "https://raw.githubusercontent.com/randomstring0/fe-source/refs/heads/main/NPC"
+local github = "https://raw.githubusercontent.com/Git-art-byte/fe-source/refs/heads/main/NPC"
 local load = loadstring(game:HttpGet(github .. "/module.Luau"))()
 
 saved = loadstring(game:HttpGet(github .. "/table.luau"))()
@@ -222,42 +222,6 @@ follownpc = new:maintoggle(save["8"].title, save["8"].des, function(a)
 	end
 end)
 
--- NEW: Freeze NPC Toggle
-local freezenpc
-freezenpc = new:maintoggle(save["11"].title, save["11"].des, function(a)
-	if currentnpc then
-		local part = currentnpc:FindFirstChild("HumanoidRootPart")
-		if part and partowner(part) then
-			part.Anchored = a
-			if a then
-				light(currentnpc, Color3.fromRGB(0, 0, 255)) -- Blue light for freeze
-			else
-				light(currentnpc, Color3.fromRGB(0, 255, 0)) -- Green light for unfreeze
-			end
-		else
-			light(currentnpc, Color3.fromRGB(255, 0, 0))
-			-- Reset toggle if we don't own the NPC
-			freezenpc:swich(false)
-		end
-	else
-		-- Reset toggle if no NPC selected
-		freezenpc:swich(false)
-	end
-end)
-
--- NEW: View NPC Button
-new:mainbutton(save["12"].title, save["12"].des, function()
-	if currentnpc then
-		local part = currentnpc:FindFirstChild("HumanoidRootPart")
-		if part then
-			ws.CurrentCamera.CameraSubject = part
-			light(currentnpc, Color3.fromRGB(255, 255, 0)) -- Yellow light for view
-		else
-			light(currentnpc, Color3.fromRGB(255, 0, 0))
-		end
-	end
-end)
-
 
 local con1
 new:extratoggle(save["9"].title, function(a)
@@ -320,7 +284,73 @@ new:extratoggle(save["10"].title, function(a)
 	end
 end)
 
+-- NEW: View NPC Toggle
+local originalCameraSubject, viewnpc
+viewnpc = new:maintoggle(save["11"].title, save["11"].des, function(a)
+	if a then
+		if currentnpc then
+			local part = currentnpc:FindFirstChild("HumanoidRootPart")
+			if part then
+				-- Store original camera subject
+				originalCameraSubject = ws.CurrentCamera.CameraSubject
+				-- Set camera to NPC
+				ws.CurrentCamera.CameraSubject = part
+				light(currentnpc, Color3.fromRGB(0, 255, 255))
+			else
+				light(currentnpc, Color3.fromRGB(255, 0, 0))
+				-- Auto-disable if no valid part
+				viewnpc:swich(false)
+			end
+		else
+			-- No NPC selected, auto-disable
+			viewnpc:swich(false)
+		end
+	else
+		-- Restore original camera subject
+		if originalCameraSubject then
+			ws.CurrentCamera.CameraSubject = originalCameraSubject
+			originalCameraSubject = nil
+		else
+			-- Fallback to player's humanoid
+			if lp.Character and lp.Character:FindFirstChildOfClass("Humanoid") then
+				ws.CurrentCamera.CameraSubject = lp.Character:FindFirstChildOfClass("Humanoid")
+			end
+		end
+	end
+end)
 
+-- NEW: Freeze NPC Toggle
+local freezenpc
+freezenpc = new:maintoggle(save["12"].title, save["12"].des, function(a)
+	if a then
+		if currentnpc then
+			local part = currentnpc:FindFirstChild("HumanoidRootPart")
+			if part and partowner(part) then
+				-- Freeze the NPC by anchoring it
+				part.Anchored = true
+				light(currentnpc, Color3.fromRGB(135, 206, 235)) -- Light blue for frozen
+			else
+				light(currentnpc, Color3.fromRGB(255, 0, 0))
+				-- Auto-disable if no network ownership
+				freezenpc:swich(false)
+			end
+		else
+			-- No NPC selected, auto-disable
+			freezenpc:swich(false)
+		end
+	else
+		if currentnpc then
+			local part = currentnpc:FindFirstChild("HumanoidRootPart")
+			if part and partowner(part) then
+				-- Unfreeze the NPC by unanchoring it
+				part.Anchored = false
+				light(currentnpc, Color3.fromRGB(0, 255, 0)) -- Green for unfrozen
+			else
+				light(currentnpc, Color3.fromRGB(255, 0, 0))
+			end
+		end
+	end
+end)
 
 
 mouse.Button1Down:Connect(function()
