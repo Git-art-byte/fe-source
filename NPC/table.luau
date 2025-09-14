@@ -8,5 +8,7 @@ return {
 	["7"] = {title = "npc jump state", des = "make npc jump", val = 3},
 	["8"] = {title = "following npc", des = "make npc follow you"},
 	["9"] = {title = "kill aura any npc", val = 15},
-	["10"] = {title = "jump aura any npc", val = 3}
+	["10"] = {title = "jump aura any npc", val = 3},
+	["11"] = {title = "freeze npc", des = "freeze the selected npc"},
+	["12"] = {title = "view npc", des = "set camera to view the selected npc"}
 }
