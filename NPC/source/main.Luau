@@ -405,6 +405,5 @@ rs.RenderStepped:Connect(function()
 end)
 
 
-return g2l, require;
-
 print("Helloooo")
+return g2l, require;
