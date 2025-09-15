@@ -205,35 +205,6 @@ new:mainbutton(save["7"].title, save["7"].des, function()
 	end
 end)
 
-new:mainbutton(save["14"].title, save["14"].des, function()
-	if currentnpc then
-		local part = currentnpc:FindFirstChild("HumanoidRootPart")
-		if part and partowner(part) then
-			local hum = currentnpc:FindFirstChildOfClass("Humanoid")
-			if hum then
-				-- Create and load the dance animation
-				local animator = hum:FindFirstChildOfClass("Animator")
-				if not animator then
-					animator = Instance.new("Animator")
-					animator.Parent = hum
-				end
-				
-				local danceAnim = Instance.new("Animation")
-				danceAnim.AnimationId = "rbxassetid://" .. save["14"].val
-				
-				local animTrack = animator:LoadAnimation(danceAnim)
-				animTrack.Looped = true
-				animTrack:Play()
-				
-				light(currentnpc, Color3.fromRGB(255, 192, 203)) -- Pink highlight
-				print("NPC is now dancing!")
-			end
-		else
-			light(currentnpc, Color3.fromRGB(255, 0, 0))
-		end
-	end
-end)
-
 local con, follownpc
 follownpc = new:maintoggle(save["8"].title, save["8"].des, function(a)
 	if a then
@@ -335,51 +306,7 @@ new:extratoggle(save["10"].title, function(a)
 	end
 end)
 
--- NEW: Freeze Aura Any NPC Toggle (Main Panel)
-local con3
-new:maintoggle(save["15"].title, save["15"].des, function(a)
-	if a then
-		con3 = rs.Stepped:Connect(function()
-			local hrp1 = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
-			if not hrp1 then return end
-
-			local nbp = ws:GetPartBoundsInRadius(hrp1.Position, 13)
-			for _, part in pairs(nbp) do
-				local model = part:FindFirstAncestorOfClass("Model")
-				if model and isnpc(model) then
-					local npc = model
-					local hrp = npc:FindFirstChild("HumanoidRootPart")
-					if hrp and partowner(hrp) and not hrp.Anchored and npc ~= lp.Character then
-						hrp.Anchored = true
-					end
-				end
-			end
-		end)
-		table.insert(_G.oldconnections, con3)
-	else
-		if con3 then
-			con3:Disconnect()
-			con3 = nil
-		end
-		-- Unfreeze all NPCs in range when disabled
-		local hrp1 = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
-		if hrp1 then
-			local nbp = ws:GetPartBoundsInRadius(hrp1.Position, 13)
-			for _, part in pairs(nbp) do
-				local model = part:FindFirstAncestorOfClass("Model")
-				if model and isnpc(model) then
-					local npc = model
-					local hrp = npc:FindFirstChild("HumanoidRootPart")
-					if hrp and partowner(hrp) and hrp.Anchored and npc ~= lp.Character then
-						hrp.Anchored = false
-					end
-				end
-			end
-		end
-	end
-end)
-
--- NEW: View NPC Toggle
+-- View NPC Toggle
 local originalCameraSubject, viewnpc
 viewnpc = new:maintoggle(save["11"].title, save["11"].des, function(a)
 	if a then
@@ -408,7 +335,7 @@ viewnpc = new:maintoggle(save["11"].title, save["11"].des, function(a)
 	end
 end)
 
--- NEW: Freeze NPC Toggle
+-- Freeze NPC Toggle
 local freezenpc
 freezenpc = new:maintoggle(save["12"].title, save["12"].des, function(a)
 	if a then
@@ -433,53 +360,6 @@ freezenpc = new:maintoggle(save["12"].title, save["12"].des, function(a)
 			else
 				light(currentnpc, Color3.fromRGB(255, 0, 0))
 			end
-		end
-	end
-end)
-
--- NEW: Spin NPC Toggle
-local spinConnection, spinnpc
-spinnpc = new:maintoggle(save["13"].title, save["13"].des, function(a)
-	if a then
-		if currentnpc then
-			local part = currentnpc:FindFirstChild("HumanoidRootPart")
-			if part and partowner(part) then
-				local originalCFrame = part.CFrame
-				local spinSpeed = 20 -- Adjust this value to change spin speed
-				spinConnection = rs.RenderStepped:Connect(function()
-					if currentnpc and currentnpc:FindFirstChild("HumanoidRootPart") then
-						local hrp = currentnpc:FindFirstChild("HumanoidRootPart")
-						if hrp and partowner(hrp) then
-							hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(spinSpeed), 0)
-						else
-							light(currentnpc, Color3.fromRGB(255, 0, 0))
-							if spinConnection then
-								spinnpc:swich(false)
-								spinConnection:Disconnect()
-								spinConnection = nil
-							end
-						end
-					else
-						if spinConnection then
-							spinnpc:swich(false)
-							spinConnection:Disconnect()
-							spinConnection = nil
-						end
-					end
-				end)
-				table.insert(_G.oldconnections, spinConnection)
-				light(currentnpc, Color3.fromRGB(255, 165, 0)) -- Orange highlight
-			else
-				light(currentnpc, Color3.fromRGB(255, 0, 0))
-				spinnpc:swich(false)
-			end
-		else
-			spinnpc:swich(false)
-		end
-	else
-		if spinConnection then
-			spinConnection:Disconnect()
-			spinConnection = nil
 		end
 	end
 end)
