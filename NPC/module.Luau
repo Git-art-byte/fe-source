@@ -74,7 +74,7 @@ G2L["7"]["BackgroundTransparency"] = 1;
 G2L["7"]["RichText"] = true;
 G2L["7"]["Size"] = UDim2.new(0.91475, 0, 1, 0);
 G2L["7"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["7"]["Text"] = [[<b>npc panel |  @Im_Patrick Youtube</b>]];
+G2L["7"]["Text"] = [[<b>npc panel |  @AngeEmmanuel Youtube</b>]];
 G2L["7"]["Position"] = UDim2.new(0.07674, 0, 0, 0);
 
 
