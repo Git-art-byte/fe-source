@@ -364,6 +364,131 @@ freezenpc = new:maintoggle(save["12"].title, save["12"].des, function(a)
 	end
 end)
 
+-- Chat Commands System
+local function handleChatCommand(message)
+	local command = message:lower()
+	
+	if not currentnpc then
+		print("No NPC selected! Click on an NPC first.")
+		return
+	end
+	
+	-- Kill NPC command
+	if command == ":kill npc" or command == ":kill" then
+		local part = currentnpc:FindFirstChild("HumanoidRootPart")
+		if part and partowner(part) then
+			local hum = currentnpc:FindFirstChildOfClass("Humanoid")
+			if hum then
+				hum:ChangeState(15)
+				print("NPC killed via chat command!")
+				light(currentnpc, Color3.fromRGB(255, 0, 0))
+			end
+		else
+			light(currentnpc, Color3.fromRGB(255, 0, 0))
+			print("Cannot kill NPC - not network owned")
+		end
+		
+	-- Bring NPC command
+	elseif command == ":bring npc" or command == ":bring" then
+		local part = currentnpc:FindFirstChild("HumanoidRootPart")
+		if part and partowner(part) then
+			if lp and lp.Character then
+				currentnpc:PivotTo(lp.Character:GetPivot())
+				print("NPC brought to you via chat command!")
+				light(currentnpc, Color3.fromRGB(0, 255, 0))
+			end
+		else
+			light(currentnpc, Color3.fromRGB(255, 0, 0))
+			print("Cannot bring NPC - not network owned")
+		end
+		
+	-- Goto NPC command
+	elseif command == ":goto npc" or command == ":goto" then
+		local part = currentnpc:FindFirstChild("HumanoidRootPart")
+		if part then
+			if lp and lp.Character then
+				lp.Character:PivotTo(currentnpc:GetPivot())
+				print("Teleported to NPC via chat command!")
+				light(currentnpc, Color3.fromRGB(0, 255, 255))
+			end
+		else
+			light(currentnpc, Color3.fromRGB(255, 0, 0))
+			print("Cannot teleport to NPC - no HumanoidRootPart found")
+		end
+		
+	-- Punish NPC command
+	elseif command == ":punish npc" or command == ":punish" then
+		local part = currentnpc:FindFirstChild("HumanoidRootPart")
+		if part and partowner(part) then
+			currentnpc:PivotTo(CFrame.new(0, 1000, 0))
+			print("NPC punished via chat command!")
+			light(currentnpc, Color3.fromRGB(255, 165, 0))
+		else
+			light(currentnpc, Color3.fromRGB(255, 0, 0))
+			print("Cannot punish NPC - not network owned")
+		end
+		
+	-- Sit NPC command
+	elseif command == ":sit npc" or command == ":sit" then
+		local part = currentnpc:FindFirstChild("HumanoidRootPart")
+		if part and partowner(part) then
+			local hum = currentnpc:FindFirstChildOfClass("Humanoid")
+			if hum then
+				hum.Sit = not hum.Sit
+				print("NPC sit toggled via chat command!")
+				light(currentnpc, Color3.fromRGB(255, 255, 0))
+			end
+		else
+			light(currentnpc, Color3.fromRGB(255, 0, 0))
+			print("Cannot sit NPC - not network owned")
+		end
+		
+	-- Jump NPC command
+	elseif command == ":jump npc" or command == ":jump" then
+		local part = currentnpc:FindFirstChild("HumanoidRootPart")
+		if part and partowner(part) then
+			local hum = currentnpc:FindFirstChildOfClass("Humanoid")
+			if hum then
+				hum:ChangeState(3)
+				print("NPC jumped via chat command!")
+				light(currentnpc, Color3.fromRGB(0, 255, 0))
+			end
+		else
+			light(currentnpc, Color3.fromRGB(255, 0, 0))
+			print("Cannot make NPC jump - not network owned")
+		end
+		
+	-- Freeze NPC command
+	elseif command == ":freeze npc" or command == ":freeze" then
+		local part = currentnpc:FindFirstChild("HumanoidRootPart")
+		if part and partowner(part) then
+			part.Anchored = not part.Anchored
+			print("NPC freeze toggled via chat command! Frozen:", part.Anchored)
+			light(currentnpc, part.Anchored and Color3.fromRGB(135, 206, 235) or Color3.fromRGB(0, 255, 0))
+		else
+			light(currentnpc, Color3.fromRGB(255, 0, 0))
+			print("Cannot freeze NPC - not network owned")
+		end
+		
+	-- Help command
+	elseif command == ":help" or command == ":commands" then
+		print("=== NPC Chat Commands ===")
+		print(":kill npc or :kill - Kill selected NPC")
+		print(":bring npc or :bring - Bring NPC to you")
+		print(":goto npc or :goto - Teleport to NPC")
+		print(":punish npc or :punish - Send NPC to space")
+		print(":sit npc or :sit - Toggle NPC sitting")
+		print(":jump npc or :jump - Make NPC jump")
+		print(":freeze npc or :freeze - Freeze/unfreeze NPC")
+		print(":help or :commands - Show this help")
+		print("========================")
+	end
+end
+
+-- Connect chat command system
+local chatConnection = lp.Chatted:Connect(handleChatCommand)
+table.insert(_G.oldconnections, chatConnection)
+
 -- Mouse click to select NPC
 local mouseConnection = mouse.Button1Down:Connect(function()
 	if clicknpc and mouse.Target and mouse.Target.Parent:FindFirstChild("HumanoidRootPart") then
@@ -373,6 +498,7 @@ local mouseConnection = mouse.Button1Down:Connect(function()
 					currentnpc = mouse.Target.Parent
 					light(currentnpc, Color3.fromRGB(0, 255, 0))
 					print("NPC selected:", currentnpc.Name)
+					print("You can now use chat commands like ':kill npc' or ':help' for more commands")
 				else
 					light(mouse.Target.Parent, Color3.fromRGB(255, 0, 0))
 					print("NPC not network owned")
